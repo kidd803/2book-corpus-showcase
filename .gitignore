@@ -46,8 +46,6 @@ next-env.d.ts
 /scripts/
 /public/catalog.json
 /public/sample-catalog.json
-/public/official-search.json
-/public/archive/
 
 # local development logs
 /dev.stdout.log

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://archive.2book.tw/archive/sitemap.xml
