@@ -23,6 +23,8 @@ const copy = {
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "百萬冊實體藏書索引",
     archiveDesc: "超過 104 萬筆實體庫存紀錄，可能包含相同書名、不同版本與重複冊；不重複書目數仍在盤點與去重。",
     archiveCopy: "目前公開前 100 頁、共 100,000 筆實體藏書資料；其餘書目尚未開放。",
+    archiveImageAlt: "鐵皮屋頂下排列的 16 個藏書貨櫃示意圖",
+    archiveImageCaption: "16 個貨櫃上方設有鐵皮屋頂，集中保存四十多年累積的實體書。",
     openArchive: "進入公開書目索引", pages: "個公開目錄頁", fields: "個公開欄位", fieldNames: "書名 · 作者 · 出版社 · 出版日期",
     methodKicker: "OUR METHOD 03", methodTitle: "AI 進化，不以破壞文化為代價。",
     methodDesc: "我們採用非破壞性掃描，讓紙本內容進入數位世界，同時保留每一本實體書。",
@@ -52,6 +54,8 @@ const copy = {
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "Million-book physical archive",
     archiveDesc: "More than 1.04 million physical inventory records, potentially including duplicate copies and multiple editions. Unique-title counting and deduplication remain in progress.",
     archiveCopy: "The first 100 pages—100,000 physical book records—are currently open. The remaining catalog is not yet public.",
+    archiveImageAlt: "Illustration of 16 book-filled shipping containers beneath a metal roof",
+    archiveImageCaption: "Sixteen roof-covered containers preserve the physical books accumulated over more than four decades.",
     openArchive: "Open the public catalog index", pages: "open catalog pages", fields: "public fields", fieldNames: "Title · Author · Publisher · Publication date",
     methodKicker: "OUR METHOD 03", methodTitle: "AI progress without cultural destruction.",
     methodDesc: "Our non-destructive workflow brings printed content into the digital world while preserving every physical book.",
@@ -152,6 +156,7 @@ export default function CatalogBrowser() {
 
       <section className="archive-section" id="archive">
         <div className="section-heading"><div><span className="section-kicker">{t.archiveKicker}</span><h2>{t.archiveTitle}</h2></div><p>{t.archiveDesc}</p></div>
+        <figure className="archive-visual"><img src="/sixteen-container-library.png" alt={t.archiveImageAlt} /><figcaption>{t.archiveImageCaption}</figcaption></figure>
         <div className="archive-card"><div><span className="archive-number">1,046,365</span><h3>{t.archiveTitle}</h3><p>{t.archiveCopy}</p><a className="archive-link" href="/archive/index.html">{t.openArchive} <span>↗</span></a></div><dl><div><dt>{number(TOTAL_BOOKS, language)}</dt><dd>{t.records}</dd></div><div><dt>{number(PUBLIC_ARCHIVE_PAGES, language)}</dt><dd>{t.pages}</dd></div><div><dt>4</dt><dd>{t.fields}<small>{t.fieldNames}</small></dd></div></dl></div>
       </section>
 

@@ -111,6 +111,9 @@ button, select { cursor: pointer; }
 
 .archive-section, .method-section { padding: 96px max(5vw, calc((100vw - 1296px) / 2)) 110px; }
 .archive-section { background: var(--paper); }
+.archive-visual { margin: 52px 0 0; overflow: hidden; border: 1px solid var(--line); background: #16241f; box-shadow: 0 22px 70px rgba(23,33,31,.09); }
+.archive-visual img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.archive-visual figcaption { padding: 13px 18px; color: var(--muted); background: white; font-size: 12px; line-height: 1.6; }
 .method-section { background: var(--paper-light); }
 .method-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin-top: 52px; border: 1px solid var(--line); background: var(--line); }
 .method-grid article { min-height: 290px; padding: 38px; display: flex; flex-direction: column; background: white; }
