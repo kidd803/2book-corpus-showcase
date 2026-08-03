@@ -33,5 +33,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-Hant"><body>{children}</body></html>;
+  return (
+    <html lang="zh-Hant">
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-4D0LDDL01P" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-4D0LDDL01P');`,
+          }}
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
 }
