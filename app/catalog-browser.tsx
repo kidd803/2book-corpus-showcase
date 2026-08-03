@@ -13,7 +13,7 @@ const CONTACT_EMAIL = "baby.bt@gmail.com";
 const copy = {
   zh: {
     navSearch: "官網書目", navArchive: "百萬藏書", navMethod: "技術方法", navInquiry: "商務合作", internal: "公開書目",
-    eyebrow: "實體中文語料供應與數位化執行中心", headline1: "百萬冊實體中文語料，", headline2: "已集中、保存、初步編目。",
+    eyebrow: "實體中文語料供應與數位化執行中心", headline1: "四十多年累積，逾百萬冊中文實體藏書。", headline2: "現已集中保存，並逐步建立書目資料。",
     intro: "臻品齋是一間經營 44 年的二手書店。四十多年來，我們每天收購近 100 本書，一本一本整理、保存，長久累積超過百萬冊。如今，這批大規模實體中文藏書集中保存於 16 個貨櫃，並建立可抽樣、可追溯的初步書目；可依指定領域進行盤點、去重、非破壞掃描、OCR、校對與 AI 訓練資料格式化。",
     start: "查看官網書目", records: "筆實體庫存紀錄（含重複冊）", containers: "個實體貨櫃",
     searchKicker: "OFFICIAL CATALOG 01", searchTitle: "10 萬筆官網書目搜尋",
@@ -44,7 +44,7 @@ const copy = {
   },
   en: {
     navSearch: "Official catalog", navArchive: "Million-book archive", navMethod: "Our method", navInquiry: "Enterprise inquiry", internal: "OPEN CATALOG",
-    eyebrow: "PHYSICAL CHINESE CORPUS & DIGITIZATION PARTNER", headline1: "A million-volume Chinese corpus,", headline2: "concentrated, preserved, and initially cataloged.",
+    eyebrow: "PHYSICAL CHINESE CORPUS & DIGITIZATION PARTNER", headline1: "More than a million Chinese-language books, collected over four decades.", headline2: "Now preserved together and being progressively cataloged.",
     intro: "Zhenpinzhai (2BOOK) is a secondhand bookstore with a 44-year history. For more than four decades, we have acquired nearly 100 books a day—cataloging and preserving them one volume at a time—building a physical collection of more than one million books. Now concentrated in 16 shipping containers, the collection has a traceable preliminary catalog and can support inventory, deduplication, non-destructive scanning, OCR, correction, and AI training-data packaging.",
     start: "Browse official records", records: "physical inventory records, including duplicates", containers: "physical containers",
     searchKicker: "OFFICIAL CATALOG 01", searchTitle: "Search 100,000 official records",
