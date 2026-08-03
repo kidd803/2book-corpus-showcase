@@ -12,7 +12,7 @@ const CONTACT_EMAIL = "baby.bt@gmail.com";
 
 const copy = {
   zh: {
-    navSearch: "官網書目", navArchive: "百萬藏書", navMethod: "技術方法", navInquiry: "商務合作", internal: "內網預覽",
+    navSearch: "官網書目", navArchive: "百萬藏書", navMethod: "技術方法", navInquiry: "商務合作", internal: "公開書目",
     eyebrow: "實體中文語料供應與數位化執行中心", headline1: "百萬冊實體中文語料，", headline2: "已集中、保存、初步編目。",
     intro: "我們已將大規模實體中文藏書集中保存於 16 個貨櫃，並建立可抽樣、可追溯的初步書目。可依指定領域進行盤點、去重、權利清查、非破壞掃描、OCR、校對與 AI 訓練資料格式化，協助合作方縮短紙本語料建庫時間。",
     start: "查看官網書目", records: "筆實體庫存紀錄（含重複冊）", containers: "個實體貨櫃",
@@ -38,10 +38,10 @@ const copy = {
     org: "公司／機構", name: "聯絡人", email: "電子郵件", scope: "合作需求", budget: "預算或預計冊數", message: "補充說明",
     scopeOptions: ["請選擇", "批量非破壞性掃描", "AI 訓練資料製作", "Metadata／書目授權", "研究或文化保存合作", "其他"],
     contact: "合作信箱", submit: "送出合作意向", previewNotice: "送出後會開啟您的郵件程式，請確認按下寄送。", submitted: "郵件內容已產生；請在開啟的郵件程式中確認寄出。",
-    footer: "內網預覽版 · 實體藏書與 AI 數位化合作計畫",
+    footer: "公開書目 · 實體藏書與 AI 數位化合作計畫",
   },
   en: {
-    navSearch: "Official catalog", navArchive: "Million-book archive", navMethod: "Our method", navInquiry: "Enterprise inquiry", internal: "INTRANET PREVIEW",
+    navSearch: "Official catalog", navArchive: "Million-book archive", navMethod: "Our method", navInquiry: "Enterprise inquiry", internal: "OPEN CATALOG",
     eyebrow: "PHYSICAL CHINESE CORPUS & DIGITIZATION PARTNER", headline1: "A million-volume Chinese corpus,", headline2: "concentrated, preserved, and initially cataloged.",
     intro: "We have concentrated a large physical Chinese-language collection in 16 shipping containers and created a traceable preliminary catalog. Projects can include inventory, deduplication, rights review, non-destructive scanning, OCR, correction, and AI training-data packaging—shortening the time required to assemble a paper corpus at scale.",
     start: "Browse official records", records: "physical inventory records, including duplicates", containers: "physical containers",
@@ -67,7 +67,7 @@ const copy = {
     org: "Company / organization", name: "Contact name", email: "Email", scope: "Partnership interest", budget: "Budget or expected volume", message: "Additional context",
     scopeOptions: ["Select one", "Bulk non-destructive scanning", "AI training dataset production", "Metadata / catalog licensing", "Research or preservation partnership", "Other"],
     contact: "CONTACT EMAIL", submit: "Submit inquiry", previewNotice: "Submitting opens your email app. Please review and send the message there.", submitted: "The email draft is ready. Please confirm Send in your email app.",
-    footer: "Intranet preview · Physical archive and AI digitization initiative",
+    footer: "Open catalog · Physical archive and AI digitization initiative",
   },
 } as const;
 
