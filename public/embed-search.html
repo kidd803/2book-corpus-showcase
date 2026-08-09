@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>搜尋臻品齋官網藏書</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;background:transparent;color:#2b2118;font-family:HelveticaNeue,"Helvetica Neue",Helvetica,Arial,"Noto Sans TC",sans-serif}
+    .box{border:1px solid #e5dccf;border-radius:16px;padding:24px;background:linear-gradient(145deg,#fffaf2,#fffdf8);box-shadow:0 5px 18px rgba(62,42,24,.08)}
+    h2{margin:0 0 6px;text-align:center;font-size:24px;line-height:1.35}
+    .lead{margin:0 0 18px;text-align:center;color:#6c5949;font-size:15px;line-height:1.7}
+    .search{display:flex;gap:10px}
+    input{min-width:0;flex:1;border:1px solid #cdbda9;border-radius:11px;padding:13px 15px;background:#fff;color:#2b2118;font-size:16px;outline:none}
+    input:focus{border-color:#8b3329;box-shadow:0 0 0 3px rgba(139,51,41,.12)}
+    button{border:0;border-radius:11px;padding:0 22px;background:#7a2f25;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+    button:hover{background:#63251e}
+    button:disabled{cursor:wait;opacity:.7}
+    .status{min-height:25px;margin:10px 2px 4px;color:#786657;font-size:13px}
+    .results{display:grid;gap:8px;margin-top:8px}
+    .result{display:block;border:1px solid #eadfd2;border-radius:11px;padding:11px 13px;background:#fff;color:inherit;text-decoration:none;transition:.15s ease}
+    .result:hover{border-color:#b99372;transform:translateY(-1px);box-shadow:0 3px 10px rgba(62,42,24,.07)}
+    .title{display:block;font-size:15px;font-weight:700;line-height:1.45}
+    .meta{display:block;margin-top:4px;color:#786657;font-size:13px;line-height:1.45}
+    .footer{margin:12px 0 0;text-align:center;color:#8a7869;font-size:12px}
+    @media(max-width:520px){.box{padding:18px 14px}h2{font-size:21px}.search{display:block}button{width:100%;height:46px;margin-top:9px}}
+  </style>
+</head>
+<body>
+  <main class="box">
+    <h2>搜尋臻品齋官網藏書</h2>
+    <p class="lead">輸入書名或作者，從十萬筆官網書目中快速查找。</p>
+    <form class="search" id="search-form">
+      <input id="query" type="search" inputmode="search" autocomplete="off" placeholder="例如：道德經、金庸、中醫" aria-label="輸入書名或作者">
+      <button id="submit" type="submit">搜尋</button>
+    </form>
+    <div class="status" id="status" aria-live="polite">輸入至少 2 個字即可搜尋。</div>
+    <div class="results" id="results"></div>
+    <p class="footer">搜尋結果會直接連到 2book.tw 商品頁。</p>
+  </main>
+  <script>
+    (function(){
+      var input=document.getElementById('query');
+      var form=document.getElementById('search-form');
+      var button=document.getElementById('submit');
+      var status=document.getElementById('status');
+      var results=document.getElementById('results');
+      var books=null,loading=null,timer=0,requestId=0;
+
+      function normalize(value){return String(value||'').trim().toLocaleLowerCase('zh-TW')}
+      function loadBooks(){
+        if(books)return Promise.resolve(books);
+        if(loading)return loading;
+        button.disabled=true;
+        status.textContent='正在載入十萬筆書目，第一次需稍候…';
+        loading=fetch('/official-search.json',{cache:'force-cache'})
+          .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
+          .then(function(data){
+            books=data.map(function(book){
+              book._search=normalize(book.title+' '+book.author);
+              return book;
+            });
+            button.disabled=false;
+            return books;
+          })
+          .catch(function(){
+            loading=null;button.disabled=false;
+            status.textContent='書目載入失敗，請稍後再試。';
+            throw new Error('load');
+          });
+        return loading;
+      }
+
+      function show(found,query,id){
+        if(id!==requestId)return;
+        results.replaceChildren();
+        status.textContent=found.length?'顯示最相關的 '+found.length+' 筆結果。':'找不到「'+query+'」，請改用其他書名或作者關鍵字。';
+        found.forEach(function(book){
+          var link=document.createElement('a');
+          link.className='result';link.href=book.url;link.target='_top';
+          var title=document.createElement('span');title.className='title';title.textContent=book.title||'未命名書籍';
+          var meta=document.createElement('span');meta.className='meta';
+          meta.textContent=[book.author,book.publish_date].filter(Boolean).join(' · ');
+          link.appendChild(title);if(meta.textContent)link.appendChild(meta);results.appendChild(link);
+        });
+      }
+
+      function search(){
+        var raw=input.value.trim(),query=normalize(raw),id=++requestId;
+        clearTimeout(timer);
+        if(query.length<2){results.replaceChildren();status.textContent='輸入至少 2 個字即可搜尋。';return}
+        loadBooks().then(function(data){
+          var exact=[],partial=[];
+          for(var i=0;i<data.length;i++){
+            var book=data[i],title=normalize(book.title),author=normalize(book.author);
+            if(title===query||author===query)exact.push(book);
+            else if(partial.length<20&&book._search.indexOf(query)!==-1)partial.push(book);
+          }
+          show(exact.concat(partial).slice(0,10),raw,id);
+        }).catch(function(){});
+      }
+
+      form.addEventListener('submit',function(event){event.preventDefault();search()});
+      input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(search,280)});
+    })();
+  </script>
+</body>
+</html>
