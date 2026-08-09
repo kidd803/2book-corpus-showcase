@@ -29,7 +29,7 @@
 <body>
   <main class="box">
     <h2>搜尋臻品齋官網藏書</h2>
-    <p class="lead">輸入書名或作者，從十萬筆官網書目中快速查找。</p>
+    <p class="lead">輸入書名、作者或出版社，從超過九萬筆已發布官網商品中快速查找。</p>
     <form class="search" id="search-form">
       <input id="query" type="search" inputmode="search" autocomplete="off" placeholder="例如：道德經、金庸、中醫" aria-label="輸入書名或作者">
       <button id="submit" type="submit">搜尋</button>
@@ -64,12 +64,12 @@
         if(books)return Promise.resolve(books);
         if(loading)return loading;
         button.disabled=true;
-        status.textContent='正在載入十萬筆書目，第一次需稍候…';
+        status.textContent='正在載入超過九萬筆官網商品，第一次需稍候…';
         loading=fetch('/official-search-compact.json',{cache:'force-cache'})
           .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
           .then(function(data){
             books=data.map(function(book){
-              book[5]=normalize(book[0]+' '+book[1]+' '+book[2]+' '+book[3]);
+              book[4]=normalize(book[0]+' '+book[1]+' '+book[2]);
               return book;
             });
             button.disabled=false;
@@ -89,10 +89,10 @@
         status.textContent=found.length?'顯示最相關的 '+found.length+' 筆結果。':'找不到「'+query+'」，請改用其他書名或作者關鍵字。';
         found.forEach(function(book){
           var link=document.createElement('a');
-          link.className='result';link.href=book[4].indexOf('/')===0?'https://2book.tw'+book[4]:book[4];link.target='_top';
+          link.className='result';link.href=book[3].indexOf('/')===0?'https://2book.tw'+book[3]:book[3];link.target='_top';
           var title=document.createElement('span');title.className='title';title.textContent=book[0]||'未命名書籍';
           var meta=document.createElement('span');meta.className='meta';
-          meta.textContent=[book[1],book[2],book[3]?'商品編號 '+book[3]:''].filter(Boolean).join(' · ');
+          meta.textContent=[book[1],book[2]].filter(Boolean).join(' · ');
           link.appendChild(title);if(meta.textContent)link.appendChild(meta);results.appendChild(link);
         });
       }
@@ -107,7 +107,7 @@
             var book=data[i],title=normalize(book[0]),author=normalize(book[1]);
             if(title===query||author===query)exact.push(book);
             else if(starts.length<12&&(title.indexOf(query)===0||author.indexOf(query)===0))starts.push(book);
-            else if(partial.length<20&&book[5].indexOf(query)!==-1)partial.push(book);
+            else if(partial.length<20&&book[4].indexOf(query)!==-1)partial.push(book);
           }
           show(exact.concat(starts,partial).slice(0,10),raw,id);
         }).catch(function(){});

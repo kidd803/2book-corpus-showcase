@@ -3,7 +3,7 @@
 import { FormEvent, useDeferredValue, useMemo, useState } from "react";
 
 type Language = "zh" | "en";
-type OfficialBook = { id: string; title: string; author: string; publish_date: string; url: string };
+type OfficialBook = { id: string; title: string; author: string; publisher: string; publish_date: string; url: string };
 
 const TOTAL_BOOKS = 1_046_365;
 const PUBLIC_ARCHIVE_PAGES = 100;
@@ -16,10 +16,10 @@ const copy = {
     eyebrow: "實體中文語料供應與數位化執行中心", headline1: "四十多年累積，逾百萬冊中文實體藏書。", headline2: "現已集中保存，並逐步建立書目資料。",
     intro: "臻品齋是一間經營 44 年的二手書店。四十多年來，我們每天收購近 100 本書，一本一本整理、保存，長久累積超過百萬冊。如今，這批大規模實體中文藏書集中保存於 16 個貨櫃，並建立可抽樣、可追溯的初步書目；可依指定領域進行盤點、去重、非破壞掃描、OCR、校對與 AI 訓練資料格式化。",
     start: "查看官網書目", records: "筆實體庫存紀錄（含重複冊）", containers: "個實體貨櫃",
-    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "10 萬筆官網書目搜尋",
-    searchDesc: "搜尋目前 2BOOK 官網整理完成的 100,000 筆書名與作者。百萬貨櫃藏書另以靜態頁面公開。",
-    placeholder: "輸入書名或作者…", loading: "首次使用時載入 10 萬筆官網書目…", loadHint: "點擊搜尋框即可載入官網書目。",
-    results: "筆結果", title: "書名", author: "作者", publishDate: "出版日期", previous: "← 上一頁", next: "下一頁 →", page: "頁",
+    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "超過 9 萬筆官網商品搜尋",
+    searchDesc: "搜尋目前 2BOOK 後台 91,756 筆已發布、未刪除且網址不重複的商品，包含書名、作者與出版社。百萬貨櫃藏書另以靜態頁面公開。",
+    placeholder: "輸入書名、作者或出版社…", loading: "首次使用時載入超過 9 萬筆官網商品…", loadHint: "點擊搜尋框即可載入官網書目。",
+    results: "筆結果", title: "書名", author: "作者", publisher: "出版社", publishDate: "出版日期", previous: "← 上一頁", next: "下一頁 →", page: "頁",
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "百萬冊實體藏書索引",
     archiveDesc: "超過 104 萬筆實體庫存紀錄，可能包含相同書名、不同版本與重複冊；不重複書目數仍在盤點與去重。",
     archiveCopy: "目前公開前 100 頁、共 100,000 筆實體藏書資料；其餘書目尚未開放。",
@@ -47,10 +47,10 @@ const copy = {
     eyebrow: "PHYSICAL CHINESE CORPUS & DIGITIZATION PARTNER", headline1: "More than a million Chinese-language books, collected over four decades.", headline2: "Now preserved together and being progressively cataloged.",
     intro: "Zhenpinzhai (2BOOK) is a secondhand bookstore with a 44-year history. For more than four decades, we have acquired nearly 100 books a day—cataloging and preserving them one volume at a time—building a physical collection of more than one million books. Now concentrated in 16 shipping containers, the collection has a traceable preliminary catalog and can support inventory, deduplication, non-destructive scanning, OCR, correction, and AI training-data packaging.",
     start: "Browse official records", records: "physical inventory records, including duplicates", containers: "physical containers",
-    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "Search 100,000 official records",
-    searchDesc: "Search titles and authors across 100,000 records prepared from the current 2BOOK catalog. The million-book container archive is disclosed separately as static pages.",
-    placeholder: "Search title or author…", loading: "Loading 100,000 official records for the first time…", loadHint: "Select the search field to load the official catalog.",
-    results: "results", title: "TITLE", author: "AUTHOR", publishDate: "PUBLICATION DATE", previous: "← Previous", next: "Next →", page: "Page",
+    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "Search 90,000+ official products",
+    searchDesc: "Search titles, authors, and publishers across 91,756 published, non-deleted products with unique URLs from the current 2BOOK backend. The million-book container archive is disclosed separately as static pages.",
+    placeholder: "Search title, author, or publisher…", loading: "Loading 90,000+ official products for the first time…", loadHint: "Select the search field to load the official catalog.",
+    results: "results", title: "TITLE", author: "AUTHOR", publisher: "PUBLISHER", publishDate: "PUBLICATION DATE", previous: "← Previous", next: "Next →", page: "Page",
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "Million-book physical archive",
     archiveDesc: "More than 1.04 million physical inventory records, potentially including duplicate copies and multiple editions. Unique-title counting and deduplication remain in progress.",
     archiveCopy: "The first 100 pages—100,000 physical book records—are currently open. The remaining catalog is not yet public.",
@@ -101,7 +101,7 @@ export default function CatalogBrowser() {
 
   const filtered = useMemo(() => {
     if (!deferredQuery) return officialBooks;
-    return officialBooks.filter((book) => (book.title + " " + book.author).toLocaleLowerCase("zh-TW").includes(deferredQuery));
+    return officialBooks.filter((book) => (book.title + " " + book.author + " " + book.publisher).toLocaleLowerCase("zh-TW").includes(deferredQuery));
   }, [officialBooks, deferredQuery]);
   const pageCount = Math.max(1, Math.ceil(filtered.length / SEARCH_PAGE_SIZE));
   const visible = filtered.slice((searchPage - 1) * SEARCH_PAGE_SIZE, searchPage * SEARCH_PAGE_SIZE);
@@ -149,8 +149,8 @@ export default function CatalogBrowser() {
       <section className="catalog-section" id="catalog">
         <div className="section-heading"><div><span className="section-kicker">{t.searchKicker}</span><h2>{t.searchTitle}</h2></div><p>{t.searchDesc}</p></div>
         <div className="search-panel single-search"><label className="search-box"><span aria-hidden="true">⌕</span><input value={query} onFocus={loadOfficialCatalog} onChange={(event) => { setQuery(event.target.value); setSearchPage(1); loadOfficialCatalog(); }} placeholder={t.placeholder} aria-label={t.placeholder} /></label></div>
-        <div className="results-bar"><p>{catalogLoading ? t.loading : catalogLoaded ? <><strong>{number(filtered.length, language)}</strong> {t.results}</> : t.loadHint}</p><span>{t.title} · {t.author} · {t.publishDate}</span></div>
-        {catalogLoaded && <div className="catalog-table"><div className="table-head official-columns"><span>{t.title}</span><span>{t.author}</span><span>{t.publishDate}</span></div>{visible.map((book, index) => <article className="book-row official-columns" key={book.id}><div className="book-title"><small>{String((searchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(6, "0")}</small><strong><a href={book.url} target="_blank" rel="noreferrer">{book.title} <span className="external-mark">↗</span></a></strong></div><div className="book-author">{book.author}</div><div className="book-publish-date">{book.publish_date}</div></article>)}</div>}
+        <div className="results-bar"><p>{catalogLoading ? t.loading : catalogLoaded ? <><strong>{number(filtered.length, language)}</strong> {t.results}</> : t.loadHint}</p><span>{t.title} · {t.author} · {t.publisher}</span></div>
+        {catalogLoaded && <div className="catalog-table"><div className="table-head official-columns"><span>{t.title}</span><span>{t.author}</span><span>{t.publisher}</span></div>{visible.map((book, index) => <article className="book-row official-columns" key={book.id}><div className="book-title"><small>{String((searchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(6, "0")}</small><strong><a href={book.url} target="_blank" rel="noreferrer">{book.title} <span className="external-mark">↗</span></a></strong></div><div className="book-author">{book.author}</div><div className="book-publish-date">{book.publisher}</div></article>)}</div>}
         {catalogLoaded && filtered.length > SEARCH_PAGE_SIZE && <div className="pagination"><button disabled={searchPage === 1} onClick={() => setSearchPage((value) => Math.max(1, value - 1))}>{t.previous}</button><span>{t.page} <strong>{number(searchPage, language)}</strong> / {number(pageCount, language)}</span><button disabled={searchPage === pageCount} onClick={() => setSearchPage((value) => Math.min(pageCount, value + 1))}>{t.next}</button></div>}
       </section>
 
