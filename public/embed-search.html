@@ -53,11 +53,11 @@
         if(loading)return loading;
         button.disabled=true;
         status.textContent='正在載入十萬筆書目，第一次需稍候…';
-        loading=fetch('/official-search.json',{cache:'force-cache'})
+        loading=fetch('/official-search-compact.json',{cache:'force-cache'})
           .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
           .then(function(data){
             books=data.map(function(book){
-              book._search=normalize(book.title+' '+book.author);
+              book[3]=normalize(book[0]+' '+book[1]);
               return book;
             });
             button.disabled=false;
@@ -77,10 +77,10 @@
         status.textContent=found.length?'顯示最相關的 '+found.length+' 筆結果。':'找不到「'+query+'」，請改用其他書名或作者關鍵字。';
         found.forEach(function(book){
           var link=document.createElement('a');
-          link.className='result';link.href=book.url;link.target='_top';
-          var title=document.createElement('span');title.className='title';title.textContent=book.title||'未命名書籍';
+          link.className='result';link.href=book[2].indexOf('/')===0?'https://2book.tw'+book[2]:book[2];link.target='_top';
+          var title=document.createElement('span');title.className='title';title.textContent=book[0]||'未命名書籍';
           var meta=document.createElement('span');meta.className='meta';
-          meta.textContent=[book.author,book.publish_date].filter(Boolean).join(' · ');
+          meta.textContent=book[1]||'';
           link.appendChild(title);if(meta.textContent)link.appendChild(meta);results.appendChild(link);
         });
       }
@@ -90,13 +90,14 @@
         clearTimeout(timer);
         if(query.length<2){results.replaceChildren();status.textContent='輸入至少 2 個字即可搜尋。';return}
         loadBooks().then(function(data){
-          var exact=[],partial=[];
+          var exact=[],starts=[],partial=[];
           for(var i=0;i<data.length;i++){
-            var book=data[i],title=normalize(book.title),author=normalize(book.author);
+            var book=data[i],title=normalize(book[0]),author=normalize(book[1]);
             if(title===query||author===query)exact.push(book);
-            else if(partial.length<20&&book._search.indexOf(query)!==-1)partial.push(book);
+            else if(starts.length<12&&(title.indexOf(query)===0||author.indexOf(query)===0))starts.push(book);
+            else if(partial.length<20&&book[3].indexOf(query)!==-1)partial.push(book);
           }
-          show(exact.concat(partial).slice(0,10),raw,id);
+          show(exact.concat(starts,partial).slice(0,10),raw,id);
         }).catch(function(){});
       }
 
