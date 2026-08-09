@@ -4,6 +4,7 @@ import { FormEvent, useDeferredValue, useMemo, useState } from "react";
 
 type Language = "zh" | "en";
 type OfficialBook = { id: string; title: string; author: string; publisher: string; publish_date: string; url: string };
+type CompactOfficialBook = [string, string, string, string, string?];
 
 const TOTAL_BOOKS = 1_046_365;
 const PUBLIC_ARCHIVE_PAGES = 100;
@@ -93,9 +94,19 @@ export default function CatalogBrowser() {
   function loadOfficialCatalog() {
     if (catalogLoaded || catalogLoading) return;
     setCatalogLoading(true);
-    fetch("/official-search.json")
+    fetch("/official-search-compact.json?v=backend-111321-images-20260810")
       .then((response) => response.json())
-      .then((data: OfficialBook[]) => { setOfficialBooks(data); setCatalogLoaded(true); })
+      .then((data: CompactOfficialBook[]) => {
+        setOfficialBooks(data.map((book, index) => ({
+          id: String(index + 1),
+          title: book[0] || "",
+          author: book[1] || "",
+          publisher: book[2] || "",
+          publish_date: "",
+          url: book[3].startsWith("/") ? "https://2book.tw" + book[3] : book[3],
+        })));
+        setCatalogLoaded(true);
+      })
       .finally(() => setCatalogLoading(false));
   }
 
