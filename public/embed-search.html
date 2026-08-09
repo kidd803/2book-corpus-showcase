@@ -3,24 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>搜尋臻品齋官網藏書</title>
+  <title>臻品齋書店藏書搜尋</title>
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;background:transparent;color:#2b2118;font-family:HelveticaNeue,"Helvetica Neue",Helvetica,Arial,"Noto Sans TC",sans-serif}
+    html,body{min-height:100%;margin:0;background:transparent;color:#2b2118;font-family:HelveticaNeue,"Helvetica Neue",Helvetica,Arial,"Noto Sans TC",sans-serif}
     .box{border:1px solid #e5dccf;border-radius:16px;padding:24px;background:linear-gradient(145deg,#fffaf2,#fffdf8);box-shadow:0 5px 18px rgba(62,42,24,.08)}
     h2{margin:0 0 6px;text-align:center;font-size:24px;line-height:1.35}
     .lead{margin:0 0 18px;text-align:center;color:#6c5949;font-size:15px;line-height:1.7}
+    .search-sticky{position:relative;z-index:5}
     .search{display:flex;gap:10px}
     input{min-width:0;flex:1;border:1px solid #cdbda9;border-radius:11px;padding:13px 15px;background:#fff;color:#2b2118;font-size:16px;outline:none}
     input:focus{border-color:#8b3329;box-shadow:0 0 0 3px rgba(139,51,41,.12)}
     button{border:0;border-radius:11px;padding:0 22px;background:#7a2f25;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
     button:hover{background:#63251e}
-    button:disabled{cursor:wait;opacity:.7}
+    button:disabled{cursor:default;opacity:.5}
+    #submit:disabled{cursor:wait;opacity:.7}
     .status{min-height:25px;margin:10px 2px 4px;color:#786657;font-size:13px}
     .results{display:grid;gap:9px;margin-top:8px}
-    .box.has-results{height:680px;padding-top:16px;padding-bottom:14px;overflow:hidden}
+    .box.has-results{height:auto;min-height:0;padding-top:12px;padding-bottom:14px;overflow:visible}
     .box.has-results h2,.box.has-results .lead,.box.has-results .footer{display:none}
-    .box.has-results .results{max-height:565px;overflow-y:auto;padding-right:5px;overscroll-behavior:contain;scrollbar-gutter:stable}
+    .box.has-results .search-sticky{position:sticky;top:0;margin:0 -2px;padding:4px 2px 8px;background:linear-gradient(145deg,#fffaf2 0%,#fffdf8 100%);box-shadow:0 8px 10px -12px rgba(62,42,24,.45)}
+    .box.has-results .results{overflow:visible;padding-right:0}
+    .box.slots-6 .results{min-height:561px}
+    .box.slots-10 .results{min-height:941px}
     .result{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:13px;min-height:86px;border:1px solid #eadfd2;border-radius:11px;padding:8px 12px 8px 8px;background:#fff;color:inherit;text-decoration:none;transition:.15s ease}
     .result:hover{border-color:#b99372;transform:translateY(-1px);box-shadow:0 3px 10px rgba(62,42,24,.07)}
     .cover{display:flex;width:58px;height:76px;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;background:#f1e7d9;color:#8b6d54;font-size:10px;font-weight:700;letter-spacing:.04em;box-shadow:0 2px 7px rgba(62,42,24,.12)}
@@ -28,20 +33,46 @@
     .content{min-width:0}
     .title{display:block;font-size:15px;font-weight:700;line-height:1.45}
     .meta{display:block;margin-top:4px;color:#786657;font-size:13px;line-height:1.45}
+    .pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+    .pagination[hidden]{display:none}
+    .pagination button{min-width:88px;height:38px;padding:0 14px;border:1px solid #cdbda9;background:#fff;color:#7a2f25;font-size:14px}
+    .pagination button:hover:not(:disabled){border-color:#7a2f25;background:#fff8ef}
+    .page-label{min-width:70px;text-align:center;color:#786657;font-size:13px}
     .footer{margin:12px 0 0;text-align:center;color:#8a7869;font-size:12px}
-    @media(max-width:520px){.box{padding:18px 14px}h2{font-size:21px}.search{display:block}button{width:100%;height:46px;margin-top:9px}.box.has-results{height:640px;padding:12px 10px}.box.has-results .results{max-height:525px}.result{grid-template-columns:50px minmax(0,1fr);gap:10px;min-height:78px;padding:7px 9px 7px 7px}.cover{width:50px;height:68px}.title{font-size:14px}}
+    @media(max-width:520px){
+      .box{padding:18px 14px}
+      h2{font-size:21px}
+      .search{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:8px}
+      #submit{width:74px;height:46px;padding:0;margin:0}
+      .box.has-results{padding:8px 10px 12px}
+      .box.has-results .search-sticky{margin:0 -2px;padding:3px 2px 7px}
+      .box.slots-6 .results{min-height:513px}
+      .box.slots-10 .results{min-height:861px}
+      .result{grid-template-columns:50px minmax(0,1fr);gap:10px;min-height:78px;padding:7px 9px 7px 7px}
+      .cover{width:50px;height:68px}
+      .title{font-size:14px}
+      .pagination{gap:8px}
+      .pagination button{min-width:76px;height:40px;padding:0 10px}
+    }
   </style>
 </head>
 <body>
   <main class="box">
     <h2>臻品齋書店｜新書・絕版書・簡體書與道教好書</h2>
     <p class="lead">輸入書名、作者或出版社，即可從官網已上架的十萬多筆商品中快速查找。</p>
-    <form class="search" id="search-form">
-      <input id="query" type="search" inputmode="search" autocomplete="off" placeholder="例如：道德經、金庸、中醫" aria-label="輸入書名或作者">
-      <button id="submit" type="submit">搜尋</button>
-    </form>
-    <div class="status" id="status" aria-live="polite">輸入至少 2 個字即可搜尋。</div>
+    <div class="search-sticky" id="search-sticky">
+      <form class="search" id="search-form">
+        <input id="query" type="search" inputmode="search" autocomplete="off" placeholder="例如：道德經、金庸、中醫" aria-label="輸入書名、作者或出版社">
+        <button id="submit" type="submit">搜尋</button>
+      </form>
+      <div class="status" id="status" aria-live="polite">輸入至少 2 個字即可搜尋。</div>
+    </div>
     <div class="results" id="results"></div>
+    <nav class="pagination" id="pagination" aria-label="搜尋結果分頁" hidden>
+      <button id="previous" type="button">上一頁</button>
+      <span class="page-label" id="page-label"></span>
+      <button id="next" type="button">下一頁</button>
+    </nav>
     <p class="footer">搜尋結果會直接連到 2book.tw 商品頁。</p>
   </main>
   <script>
@@ -52,25 +83,33 @@
       var button=document.getElementById('submit');
       var status=document.getElementById('status');
       var results=document.getElementById('results');
+      var pagination=document.getElementById('pagination');
+      var previous=document.getElementById('previous');
+      var next=document.getElementById('next');
+      var pageLabel=document.getElementById('page-label');
       var books=null,loading=null,timer=0,requestId=0;
+      var matches=[],currentPage=1,activeQuery='',pageSize=10;
 
       function reportHeight(){
         if(!box)return;
-        parent.postMessage({source:'2book-search',height:Math.ceil(box.getBoundingClientRect().height)},'*');
+        var hasResults=box.classList.contains('has-results');
+        var height=hasResults?(window.matchMedia('(max-width:520px)').matches?640:720):Math.ceil(box.getBoundingClientRect().height);
+        parent.postMessage({source:'2book-search',height:height},'*');
       }
 
       if('ResizeObserver' in window){
-        new ResizeObserver(reportHeight).observe(document.querySelector('.box'));
+        new ResizeObserver(reportHeight).observe(box);
       }else{
         window.addEventListener('load',reportHeight);
       }
+      window.addEventListener('resize',reportHeight);
 
       function normalize(value){return String(value||'').trim().toLocaleLowerCase('zh-TW')}
       function loadBooks(){
         if(books)return Promise.resolve(books);
         if(loading)return loading;
         button.disabled=true;
-        status.textContent='正在載入超過九萬筆官網商品，第一次需稍候…';
+        status.textContent='正在載入十萬多筆官網商品，第一次搜尋請稍候…';
         loading=fetch('/official-search-compact.json?v=backend-111321-images-20260810',{cache:'force-cache'})
           .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
           .then(function(data){
@@ -84,54 +123,105 @@
           })
           .catch(function(){
             loading=null;button.disabled=false;
-            status.textContent='書目載入失敗，請稍後再試。';
+            status.textContent='書目載入失敗，請稍後重新搜尋。';
             throw new Error('load');
           });
         return loading;
       }
 
-      function show(found,query,id){
-        if(id!==requestId)return;
+      function setResultState(total){
+        box.classList.toggle('has-results',total>0);
+        box.classList.toggle('slots-6',total>=1&&total<=6);
+        box.classList.toggle('slots-10',total>=7);
+      }
+
+      function makeCard(book){
+        var link=document.createElement('a');
+        link.className='result';link.href=book[3].indexOf('/')===0?'https://2book.tw'+book[3]:book[3];link.target='_top';
+        var cover=document.createElement('span');cover.className='cover';
+        if(book[4]){var image=document.createElement('img');image.src=book[4];image.alt='';image.loading='lazy';image.decoding='async';cover.appendChild(image)}else{cover.textContent='2BOOK'}
+        var content=document.createElement('span');content.className='content';
+        var title=document.createElement('span');title.className='title';title.textContent=book[0]||'未命名書籍';
+        var meta=document.createElement('span');meta.className='meta';meta.textContent=[book[1],book[2]].filter(Boolean).join('・');
+        content.appendChild(title);if(meta.textContent)content.appendChild(meta);
+        link.appendChild(cover);link.appendChild(content);
+        return link;
+      }
+
+      function scrollResultsTop(){
+        window.scrollTo({top:0,left:0,behavior:'smooth'});
+      }
+
+      function renderPage(scrollToTop){
+        var total=matches.length;
         results.replaceChildren();
-        box.classList.toggle('has-results',found.length>0);
-        status.textContent=found.length?'顯示最相關的 '+found.length+' 筆結果。':'找不到「'+query+'」，請改用其他書名或作者關鍵字。';
-        found.forEach(function(book){
-          var link=document.createElement('a');
-          link.className='result';link.href=book[3].indexOf('/')===0?'https://2book.tw'+book[3]:book[3];link.target='_top';
-          var cover=document.createElement('span');cover.className='cover';
-          if(book[4]){var image=document.createElement('img');image.src=book[4];image.alt='';image.loading='lazy';image.decoding='async';cover.appendChild(image)}else{cover.textContent='2BOOK'}
-          var content=document.createElement('span');content.className='content';
-          var title=document.createElement('span');title.className='title';title.textContent=book[0]||'未命名書籍';
-          var meta=document.createElement('span');meta.className='meta';
-          meta.textContent=[book[1],book[2]].filter(Boolean).join(' · ');
-          content.appendChild(title);if(meta.textContent)content.appendChild(meta);link.appendChild(cover);link.appendChild(content);results.appendChild(link);
-        });
+        setResultState(total);
+
+        if(!total){
+          status.textContent='找不到「'+activeQuery+'」，請改用其他書名、作者或出版社。';
+          pagination.hidden=true;
+          pageLabel.textContent='';
+          reportHeight();
+          if(scrollToTop)scrollResultsTop();
+          return;
+        }
+
+        var totalPages=Math.ceil(total/pageSize);
+        if(currentPage>totalPages)currentPage=totalPages;
+        var start=(currentPage-1)*pageSize;
+        var end=Math.min(start+pageSize,total);
+        status.textContent='共找到'+total+'筆，目前顯示第'+(start+1)+'～'+end+'筆';
+        matches.slice(start,end).forEach(function(book){results.appendChild(makeCard(book))});
+
+        pagination.hidden=total<=pageSize;
+        previous.disabled=currentPage===1;
+        next.disabled=currentPage===totalPages;
+        pageLabel.textContent='第 '+currentPage+' / '+totalPages+' 頁';
+        reportHeight();
+        if(scrollToTop)scrollResultsTop();
       }
 
       function search(){
         var raw=input.value.trim(),query=normalize(raw),id=++requestId;
         clearTimeout(timer);
-        if(query.length<2){results.replaceChildren();box.classList.remove('has-results');status.textContent='輸入至少 2 個字即可搜尋。';return}
+        if(query.length<2){
+          matches=[];activeQuery='';currentPage=1;
+          results.replaceChildren();setResultState(0);pagination.hidden=true;
+          status.textContent='輸入至少 2 個字即可搜尋。';reportHeight();return;
+        }
         loadBooks().then(function(data){
+          if(id!==requestId)return;
           var exact=[],starts=[],partial=[];
           for(var i=0;i<data.length;i++){
             var book=data[i],title=normalize(book[0]),author=normalize(book[1]);
             if(title===query||author===query)exact.push(book);
-            else if(starts.length<12&&(title.indexOf(query)===0||author.indexOf(query)===0))starts.push(book);
-            else if(partial.length<20&&book[5].indexOf(query)!==-1)partial.push(book);
+            else if(title.indexOf(query)===0||author.indexOf(query)===0)starts.push(book);
+            else if(book[5].indexOf(query)!==-1)partial.push(book);
           }
-          show(exact.concat(starts,partial).slice(0,10),raw,id);
+          matches=exact.concat(starts,partial);
+          activeQuery=raw;currentPage=1;
+          renderPage(true);
         }).catch(function(){
-          results.replaceChildren();
-          box.classList.remove('has-results');
-          status.textContent='書目更新中，請重新整理後再搜尋。';
-          reportHeight();
+          if(id!==requestId)return;
+          matches=[];results.replaceChildren();setResultState(0);pagination.hidden=true;
+          status.textContent='搜尋發生錯誤，請重新整理後再試。';reportHeight();
         });
       }
 
       form.addEventListener('submit',function(event){event.preventDefault();search()});
       input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(search,280)});
-      reportHeight();
+      previous.addEventListener('click',function(){if(currentPage>1){currentPage--;renderPage(true)}});
+      next.addEventListener('click',function(){if(currentPage*pageSize<matches.length){currentPage++;renderPage(true)}});
+
+      var testCount=new URLSearchParams(location.search).get('test-count');
+      if(testCount!==null){
+        var count=Math.max(0,Math.min(38,Number(testCount)||0));
+        activeQuery='版面測試';input.value=activeQuery;
+        for(var i=1;i<=count;i++)matches.push(['測試書籍 '+i,'測試作者','測試出版社','https://2book.tw/','']);
+        renderPage(false);
+      }else{
+        reportHeight();
+      }
     })();
   </script>
 </body>
