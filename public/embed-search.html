@@ -18,6 +18,9 @@
     button:disabled{cursor:wait;opacity:.7}
     .status{min-height:25px;margin:10px 2px 4px;color:#786657;font-size:13px}
     .results{display:grid;gap:8px;margin-top:8px}
+    .box.has-results{height:300px;padding-top:16px;padding-bottom:14px;overflow:hidden}
+    .box.has-results h2,.box.has-results .lead,.box.has-results .footer{display:none}
+    .box.has-results .results{max-height:194px;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
     .result{display:block;border:1px solid #eadfd2;border-radius:11px;padding:11px 13px;background:#fff;color:inherit;text-decoration:none;transition:.15s ease}
     .result:hover{border-color:#b99372;transform:translateY(-1px);box-shadow:0 3px 10px rgba(62,42,24,.07)}
     .title{display:block;font-size:15px;font-weight:700;line-height:1.45}
@@ -40,6 +43,7 @@
   </main>
   <script>
     (function(){
+      var box=document.querySelector('.box');
       var input=document.getElementById('query');
       var form=document.getElementById('search-form');
       var button=document.getElementById('submit');
@@ -48,7 +52,6 @@
       var books=null,loading=null,timer=0,requestId=0;
 
       function reportHeight(){
-        var box=document.querySelector('.box');
         if(!box)return;
         parent.postMessage({source:'2book-search',height:Math.ceil(box.getBoundingClientRect().height)},'*');
       }
@@ -87,6 +90,7 @@
       function show(found,query,id){
         if(id!==requestId)return;
         results.replaceChildren();
+        box.classList.toggle('has-results',found.length>0);
         status.textContent=found.length?'顯示最相關的 '+found.length+' 筆結果。':'找不到「'+query+'」，請改用其他書名或作者關鍵字。';
         found.forEach(function(book){
           var link=document.createElement('a');
@@ -101,7 +105,7 @@
       function search(){
         var raw=input.value.trim(),query=normalize(raw),id=++requestId;
         clearTimeout(timer);
-        if(query.length<2){results.replaceChildren();status.textContent='輸入至少 2 個字即可搜尋。';return}
+        if(query.length<2){results.replaceChildren();box.classList.remove('has-results');status.textContent='輸入至少 2 個字即可搜尋。';return}
         loadBooks().then(function(data){
           var exact=[],starts=[],partial=[];
           for(var i=0;i<data.length;i++){
@@ -113,6 +117,7 @@
           show(exact.concat(starts,partial).slice(0,10),raw,id);
         }).catch(function(){
           results.replaceChildren();
+          box.classList.remove('has-results');
           status.textContent='書目更新中，請重新整理後再搜尋。';
           reportHeight();
         });
