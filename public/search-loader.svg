@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="96" viewBox="0 0 300 96" role="img" aria-labelledby="title description">
+  <title id="title">AI 智能搜尋連線中</title>
+  <desc id="description">旋轉中的載入圖示</desc>
+  <rect width="300" height="96" rx="16" fill="#fffaf2"/>
+  <g transform="translate(46 48)">
+    <circle r="18" fill="none" stroke="#e5dccf" stroke-width="5"/>
+    <path d="M 0 -18 A 18 18 0 0 1 18 0" fill="none" stroke="#7a2f25" stroke-width="5" stroke-linecap="round">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <text x="78" y="44" fill="#2b2118" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="17" font-weight="700">AI 智能搜尋連線中</text>
+  <text x="78" y="66" fill="#786657" font-family="Arial, 'Noto Sans TC', sans-serif" font-size="13">正在準備十萬多筆官網書目…</text>
+</svg>
