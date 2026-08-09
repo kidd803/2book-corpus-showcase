@@ -85,7 +85,7 @@
       <span class="page-label" id="page-label"></span>
       <button id="next" type="button">下一頁</button>
     </nav>
-    <p class="footer">搜尋結果會直接連到 2book.tw 商品頁。</p>
+    <p class="footer" id="search-footer">搜尋結果會直接連到 2book.tw 商品頁。</p>
   </main>
   <script>
     (function(){
@@ -99,9 +99,15 @@
       var previous=document.getElementById('previous');
       var next=document.getElementById('next');
       var pageLabel=document.getElementById('page-label');
+      var footer=document.getElementById('search-footer');
+      var openInNewWindow=new URLSearchParams(window.location.search).get('open')==='new';
       var books=null,loading=null,timer=0,requestId=0,analyticsTimer=0;
       var matches=[],currentPage=1,activeQuery='',pageSize=10;
       var lastTrackedQuery='',lastTrackedAt=0;
+
+      if(openInNewWindow&&footer){
+        footer.textContent='搜尋結果會另開 2book.tw 商品頁。';
+      }
 
       function reportHeight(){
         if(!box)return;
@@ -169,7 +175,9 @@
 
       function makeCard(book){
         var link=document.createElement('a');
-        link.className='result';link.href=book[3].indexOf('/')===0?'https://2book.tw'+book[3]:book[3];link.target='_top';
+        link.className='result';link.href=book[3].indexOf('/')===0?'https://2book.tw'+book[3]:book[3];
+        link.target=openInNewWindow?'_blank':'_top';
+        if(openInNewWindow)link.rel='noopener noreferrer';
         var cover=document.createElement('span');cover.className='cover';
         if(book[4]){var image=document.createElement('img');image.src=book[4];image.alt='';image.loading='lazy';image.decoding='async';cover.appendChild(image)}else{cover.textContent='2BOOK'}
         var content=document.createElement('span');content.className='content';
