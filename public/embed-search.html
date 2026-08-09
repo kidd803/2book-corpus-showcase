@@ -47,6 +47,18 @@
       var results=document.getElementById('results');
       var books=null,loading=null,timer=0,requestId=0;
 
+      function reportHeight(){
+        var box=document.querySelector('.box');
+        if(!box)return;
+        parent.postMessage({source:'2book-search',height:Math.ceil(box.getBoundingClientRect().height)},'*');
+      }
+
+      if('ResizeObserver' in window){
+        new ResizeObserver(reportHeight).observe(document.querySelector('.box'));
+      }else{
+        window.addEventListener('load',reportHeight);
+      }
+
       function normalize(value){return String(value||'').trim().toLocaleLowerCase('zh-TW')}
       function loadBooks(){
         if(books)return Promise.resolve(books);
@@ -103,6 +115,7 @@
 
       form.addEventListener('submit',function(event){event.preventDefault();search()});
       input.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(search,280)});
+      reportHeight();
     })();
   </script>
 </body>
