@@ -65,10 +65,11 @@
         if(loading)return loading;
         button.disabled=true;
         status.textContent='正在載入超過九萬筆官網商品，第一次需稍候…';
-        loading=fetch('/official-search-compact.json',{cache:'force-cache'})
+        loading=fetch('/official-search-compact.json?v=backend-91756-20260810',{cache:'force-cache'})
           .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
           .then(function(data){
             books=data.map(function(book){
+              if(!Array.isArray(book)||typeof book[3]!=='string')throw new Error('schema');
               book[4]=normalize(book[0]+' '+book[1]+' '+book[2]);
               return book;
             });
@@ -110,7 +111,11 @@
             else if(partial.length<20&&book[4].indexOf(query)!==-1)partial.push(book);
           }
           show(exact.concat(starts,partial).slice(0,10),raw,id);
-        }).catch(function(){});
+        }).catch(function(){
+          results.replaceChildren();
+          status.textContent='書目更新中，請重新整理後再搜尋。';
+          reportHeight();
+        });
       }
 
       form.addEventListener('submit',function(event){event.preventDefault();search()});
