@@ -1,10 +1,24 @@
 <!-- 2BOOK 官網首頁：搜尋框快速載入版 -->
-<iframe
-  id="two-book-fast-search"
-  src="https://ai.2books.com.tw/embed-search"
-  title="搜尋臻品齋官網藏書"
-  loading="eager"
-  fetchpriority="high"
-  style="display:block;width:100%;height:300px;border:0;border-radius:16px;background:#fffaf2 url('https://ai.2books.com.tw/search-loader.svg') center center / 300px 96px no-repeat;"
-  referrerpolicy="strict-origin-when-cross-origin"
-></iframe>
+<div style="position:relative;width:100%;height:300px;overflow:hidden;border-radius:16px;background:#fffaf2;">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;padding:20px;color:#2b2118;font-family:HelveticaNeue,'Helvetica Neue',Helvetica,Arial,'Noto Sans TC',sans-serif;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" style="flex:0 0 44px;">
+      <circle cx="22" cy="22" r="17" fill="none" stroke="#e5dccf" stroke-width="5"></circle>
+      <path d="M22 5a17 17 0 0 1 17 17" fill="none" stroke="#7a2f25" stroke-width="5" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 22 22" to="360 22 22" dur="0.8s" repeatCount="indefinite"></animateTransform>
+      </path>
+    </svg>
+    <div>
+      <strong style="display:block;font-size:17px;line-height:1.45;">AI 智能搜尋連線中</strong>
+      <span style="display:block;margin-top:3px;color:#786657;font-size:13px;line-height:1.45;">正在準備十萬多筆官網書目…</span>
+    </div>
+  </div>
+  <iframe
+    id="two-book-fast-search"
+    src="https://ai.2books.com.tw/embed-search"
+    title="搜尋臻品齋官網藏書"
+    loading="eager"
+    fetchpriority="high"
+    style="position:relative;z-index:1;display:block;width:100%;height:300px;border:0;border-radius:16px;background:transparent;"
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</div>
