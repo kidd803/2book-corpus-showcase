@@ -213,15 +213,7 @@
       previous.addEventListener('click',function(){if(currentPage>1){currentPage--;renderPage(true)}});
       next.addEventListener('click',function(){if(currentPage*pageSize<matches.length){currentPage++;renderPage(true)}});
 
-      var testCount=new URLSearchParams(location.search).get('test-count');
-      if(testCount!==null){
-        var count=Math.max(0,Math.min(38,Number(testCount)||0));
-        activeQuery='版面測試';input.value=activeQuery;
-        for(var i=1;i<=count;i++)matches.push(['測試書籍 '+i,'測試作者','測試出版社','https://2book.tw/','']);
-        renderPage(false);
-      }else{
-        reportHeight();
-      }
+      reportHeight();
     })();
   </script>
 </body>
