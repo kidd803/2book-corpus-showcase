@@ -4,6 +4,7 @@ import { FormEvent, useDeferredValue, useMemo, useState } from "react";
 
 type Language = "zh" | "en";
 type OfficialBook = { id: string; title: string; author: string; publisher: string; publish_date: string; url: string };
+type CompactOfficialBook = [string, string, string, string, string?];
 
 const TOTAL_BOOKS = 1_046_365;
 const PUBLIC_ARCHIVE_PAGES = 100;
@@ -16,9 +17,9 @@ const copy = {
     eyebrow: "實體中文語料供應與數位化執行中心", headline1: "四十多年累積，逾百萬冊中文實體藏書。", headline2: "現已集中保存，並逐步建立書目資料。",
     intro: "臻品齋是一間經營 44 年的二手書店。四十多年來，我們每天收購近 100 本書，一本一本整理、保存，長久累積超過百萬冊。如今，這批大規模實體中文藏書集中保存於 16 個貨櫃，並建立可抽樣、可追溯的初步書目；可依指定領域進行盤點、去重、非破壞掃描、OCR、校對與 AI 訓練資料格式化。",
     start: "查看官網書目", records: "筆實體庫存紀錄（含重複冊）", containers: "個實體貨櫃",
-    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "超過 9 萬筆官網商品搜尋",
-    searchDesc: "搜尋目前 2BOOK 後台 91,756 筆已發布、未刪除且網址不重複的商品，包含書名、作者與出版社。百萬貨櫃藏書另以靜態頁面公開。",
-    placeholder: "輸入書名、作者或出版社…", loading: "首次使用時載入超過 9 萬筆官網商品…", loadHint: "點擊搜尋框即可載入官網書目。",
+    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "超過 11 萬筆官網商品搜尋",
+    searchDesc: "搜尋目前 2BOOK 後台 111,321 筆已發布、未刪除且網址不重複的商品，包含書名、作者與出版社。百萬貨櫃藏書另以靜態頁面公開。",
+    placeholder: "輸入書名、作者或出版社…", loading: "首次使用時載入超過 11 萬筆官網商品…", loadHint: "點擊搜尋框即可載入官網書目。",
     results: "筆結果", title: "書名", author: "作者", publisher: "出版社", publishDate: "出版日期", previous: "← 上一頁", next: "下一頁 →", page: "頁",
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "百萬冊實體藏書索引",
     archiveDesc: "超過 104 萬筆實體庫存紀錄，可能包含相同書名、不同版本與重複冊；不重複書目數仍在盤點與去重。",
@@ -47,9 +48,9 @@ const copy = {
     eyebrow: "PHYSICAL CHINESE CORPUS & DIGITIZATION PARTNER", headline1: "More than a million Chinese-language books, collected over four decades.", headline2: "Now preserved together and being progressively cataloged.",
     intro: "Zhenpinzhai (2BOOK) is a secondhand bookstore with a 44-year history. For more than four decades, we have acquired nearly 100 books a day—cataloging and preserving them one volume at a time—building a physical collection of more than one million books. Now concentrated in 16 shipping containers, the collection has a traceable preliminary catalog and can support inventory, deduplication, non-destructive scanning, OCR, correction, and AI training-data packaging.",
     start: "Browse official records", records: "physical inventory records, including duplicates", containers: "physical containers",
-    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "Search 90,000+ official products",
-    searchDesc: "Search titles, authors, and publishers across 91,756 published, non-deleted products with unique URLs from the current 2BOOK backend. The million-book container archive is disclosed separately as static pages.",
-    placeholder: "Search title, author, or publisher…", loading: "Loading 90,000+ official products for the first time…", loadHint: "Select the search field to load the official catalog.",
+    searchKicker: "OFFICIAL CATALOG 01", searchTitle: "Search 110,000+ official products",
+    searchDesc: "Search titles, authors, and publishers across 111,321 published, non-deleted products with unique URLs from the current 2BOOK backend. The million-book container archive is disclosed separately as static pages.",
+    placeholder: "Search title, author, or publisher…", loading: "Loading 110,000+ official products for the first time…", loadHint: "Select the search field to load the official catalog.",
     results: "results", title: "TITLE", author: "AUTHOR", publisher: "PUBLISHER", publishDate: "PUBLICATION DATE", previous: "← Previous", next: "Next →", page: "Page",
     archiveKicker: "PHYSICAL ARCHIVE 02", archiveTitle: "Million-book physical archive",
     archiveDesc: "More than 1.04 million physical inventory records, potentially including duplicate copies and multiple editions. Unique-title counting and deduplication remain in progress.",
@@ -93,9 +94,19 @@ export default function CatalogBrowser() {
   function loadOfficialCatalog() {
     if (catalogLoaded || catalogLoading) return;
     setCatalogLoading(true);
-    fetch("/official-search.json")
+    fetch("/official-search-compact.json?v=backend-111321-images-20260810")
       .then((response) => response.json())
-      .then((data: OfficialBook[]) => { setOfficialBooks(data); setCatalogLoaded(true); })
+      .then((data: CompactOfficialBook[]) => {
+        setOfficialBooks(data.map((book, index) => ({
+          id: String(index + 1),
+          title: book[0] || "",
+          author: book[1] || "",
+          publisher: book[2] || "",
+          publish_date: "",
+          url: book[3].startsWith("/") ? "https://2book.tw" + book[3] : book[3],
+        })));
+        setCatalogLoaded(true);
+      })
       .finally(() => setCatalogLoading(false));
   }
 

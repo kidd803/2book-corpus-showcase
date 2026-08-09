@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import "./globals.css";
 
 const title = "2BOOK 百萬藏書公開索引";
-const description = "臻品齋書店的實體中文語料與數位化合作網站，提供超過 9 萬筆已發布官網商品搜尋及百萬藏書索引。";
+const description = "臻品齋書店的實體中文語料與數位化合作網站，提供超過 11 萬筆已發布官網商品搜尋及百萬藏書索引。";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
