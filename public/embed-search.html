@@ -148,9 +148,13 @@
         if(loading)return loading;
         button.disabled=true;
         status.textContent='正在載入十萬多筆官網商品，第一次搜尋請稍候…';
-        loading=fetch('/official-search-compact.json?v=backend-114316-images-20260811',{cache:'force-cache'})
-          .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
-          .then(function(data){
+        loading=Promise.all([
+          fetch('/official-search-compact-1.json?v=backend-114316-images-20260811',{cache:'force-cache'}),
+          fetch('/official-search-compact-2.json?v=backend-114316-images-20260811',{cache:'force-cache'})
+        ])
+          .then(function(responses){return Promise.all(responses.map(function(response){if(!response.ok)throw new Error('load');return response.json()}))})
+          .then(function(parts){
+            var data=parts[0].concat(parts[1]);
             books=data.map(function(book){
               if(!Array.isArray(book)||typeof book[3]!=='string')throw new Error('schema');
               book[5]=normalize(book[0]+' '+book[1]+' '+book[2]);

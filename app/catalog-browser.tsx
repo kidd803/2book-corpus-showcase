@@ -94,9 +94,12 @@ export default function CatalogBrowser() {
   function loadOfficialCatalog() {
     if (catalogLoaded || catalogLoading) return;
     setCatalogLoading(true);
-    fetch("/official-search-compact.json?v=backend-114316-images-20260811")
-      .then((response) => response.json())
-      .then((data: CompactOfficialBook[]) => {
+    Promise.all([
+      fetch("/official-search-compact-1.json?v=backend-114316-images-20260811").then((response) => response.json()),
+      fetch("/official-search-compact-2.json?v=backend-114316-images-20260811").then((response) => response.json()),
+    ])
+      .then((parts: CompactOfficialBook[][]) => {
+        const data = parts.flat();
         setOfficialBooks(data.map((book, index) => ({
           id: String(index + 1),
           title: book[0] || "",
