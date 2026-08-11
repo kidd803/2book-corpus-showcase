@@ -44,6 +44,9 @@ next-env.d.ts
 # local catalog sources and recovery artifacts
 /data/
 /scripts/
+!/scripts/
+/scripts/*
+!/scripts/refresh_official_search.py
 /public/catalog.json
 /public/sample-catalog.json
 /public/official-search.json
