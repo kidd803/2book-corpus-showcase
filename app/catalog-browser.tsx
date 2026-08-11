@@ -94,7 +94,7 @@ export default function CatalogBrowser() {
   function loadOfficialCatalog() {
     if (catalogLoaded || catalogLoading) return;
     setCatalogLoading(true);
-    fetch("/official-search-compact.json?v=backend-111321-images-20260810")
+    fetch("/official-search-compact.json?v=backend-114316-images-20260811")
       .then((response) => response.json())
       .then((data: CompactOfficialBook[]) => {
         setOfficialBooks(data.map((book, index) => ({

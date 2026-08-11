@@ -148,7 +148,7 @@
         if(loading)return loading;
         button.disabled=true;
         status.textContent='正在載入十萬多筆官網商品，第一次搜尋請稍候…';
-        loading=fetch('/official-search-compact.json?v=backend-111321-images-20260810',{cache:'force-cache'})
+        loading=fetch('/official-search-compact.json?v=backend-114316-images-20260811',{cache:'force-cache'})
           .then(function(response){if(!response.ok)throw new Error('load');return response.json()})
           .then(function(data){
             books=data.map(function(book){
