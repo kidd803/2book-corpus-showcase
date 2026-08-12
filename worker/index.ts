@@ -29,6 +29,29 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    const isSearchManifest = url.pathname === "/official-search-manifest.json";
+    const isVersionedSearchAsset =
+      /^\/official-search-index-\d+\.json$/.test(url.pathname) ||
+      /^\/official-search-detail-\d+\.json$/.test(url.pathname);
+    if (isSearchManifest || isVersionedSearchAsset) {
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (assetResponse.ok) {
+        const headers = new Headers(assetResponse.headers);
+        headers.set(
+          "Cache-Control",
+          isSearchManifest
+            ? "public, max-age=300, must-revalidate"
+            : "public, max-age=31536000, immutable",
+        );
+        return new Response(assetResponse.body, {
+          status: assetResponse.status,
+          statusText: assetResponse.statusText,
+          headers,
+        });
+      }
+      return assetResponse;
+    }
+
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
