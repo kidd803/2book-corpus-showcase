@@ -95,8 +95,8 @@ export default function CatalogBrowser() {
     if (catalogLoaded || catalogLoading) return;
     setCatalogLoading(true);
     Promise.all([
-      fetch("/official-search-compact-1.json?v=stock-112354-images-20260812").then((response) => response.json()),
-      fetch("/official-search-compact-2.json?v=stock-112354-images-20260812").then((response) => response.json()),
+      fetch("/official-search-compact-1.json?v=stock-112654-images-20260812").then((response) => response.json()),
+      fetch("/official-search-compact-2.json?v=stock-112654-images-20260812").then((response) => response.json()),
     ])
       .then((parts: CompactOfficialBook[][]) => {
         const data = parts.flat();
