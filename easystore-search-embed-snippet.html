@@ -1,5 +1,5 @@
 <!-- 2BOOK 官網首頁：搜尋框快速載入版 -->
-<div style="position:relative;width:100%;height:300px;overflow:hidden;border-radius:16px;background:#fffaf2;">
+<div id="two-book-fast-search-wrap" style="position:relative;width:100%;height:300px;overflow:hidden;border-radius:16px;background:#fffaf2;transition:height .2s ease;">
   <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;padding:20px;color:#2b2118;font-family:HelveticaNeue,'Helvetica Neue',Helvetica,Arial,'Noto Sans TC',sans-serif;">
     <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" style="flex:0 0 44px;">
       <circle cx="22" cy="22" r="17" fill="none" stroke="#e5dccf" stroke-width="5"></circle>
@@ -22,3 +22,19 @@
     referrerpolicy="strict-origin-when-cross-origin"
   ></iframe>
 </div>
+<script>
+  (function () {
+    var frame = document.getElementById('two-book-fast-search');
+    var wrap = document.getElementById('two-book-fast-search-wrap');
+    if (!frame || !wrap) return;
+    window.addEventListener('message', function (event) {
+      if (event.origin !== 'https://ai.2books.com.tw') return;
+      if (!event.data || event.data.source !== '2book-search') return;
+      var reported = Number(event.data.height);
+      if (!Number.isFinite(reported)) return;
+      var height = Math.max(300, Math.min(Math.ceil(reported), 2400));
+      frame.style.height = height + 'px';
+      wrap.style.height = height + 'px';
+    });
+  })();
+</script>

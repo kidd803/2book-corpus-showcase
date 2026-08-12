@@ -4,11 +4,25 @@
 <!-- 商品頁專用：搜尋結果另開分頁，原商品頁與搜尋清單會保留 -->
 <div style="margin:28px 0;">
   <iframe
+    id="two-book-product-search"
     src="https://ai.2books.com.tw/embed-search?open=new"
     title="搜尋臻品齋官網藏書"
     style="display:block;width:100%;height:300px;border:0;border-radius:16px;background:transparent;">
   </iframe>
 </div>
+<script>
+  (function () {
+    var frame = document.getElementById('two-book-product-search');
+    if (!frame) return;
+    window.addEventListener('message', function (event) {
+      if (event.origin !== 'https://ai.2books.com.tw') return;
+      if (!event.data || event.data.source !== '2book-search') return;
+      var reported = Number(event.data.height);
+      if (!Number.isFinite(reported)) return;
+      frame.style.height = Math.max(300, Math.min(Math.ceil(reported), 2400)) + 'px';
+    });
+  })();
+</script>
 
 <p>
   <img src="https://cdn.store-assets.com/s/284321/f/17162171.png" alt="臻品齋書店介紹">

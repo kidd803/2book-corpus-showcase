@@ -112,8 +112,7 @@
 
       function reportHeight(){
         if(!box)return;
-        var hasResults=box.classList.contains('has-results');
-        var height=hasResults?(window.matchMedia('(max-width:520px)').matches?640:720):Math.ceil(box.getBoundingClientRect().height);
+        var height=Math.ceil(Math.max(box.scrollHeight,box.getBoundingClientRect().height));
         parent.postMessage({source:'2book-search',height:height},'*');
       }
 
