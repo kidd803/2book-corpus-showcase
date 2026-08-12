@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useDeferredValue, useMemo, useState } from "react";
+import { FormEvent, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 type Language = "zh" | "en";
 type OfficialBook = { id: string; title: string; author: string; publisher: string; publish_date: string; url: string };
 type CompactOfficialBook = [string, string, string, string, string?];
+type SearchManifest = { version: string; total: number; shard_size: number; shard_count: number; index_parts: string[]; details_prefix: string };
 
 const TOTAL_BOOKS = 1_046_365;
 const PUBLIC_ARCHIVE_PAGES = 100;
@@ -82,43 +83,123 @@ function number(value: number, language: Language) {
 
 export default function CatalogBrowser() {
   const [language, setLanguage] = useState<Language>("zh");
-  const [officialBooks, setOfficialBooks] = useState<OfficialBook[]>([]);
+  const [searchTerms, setSearchTerms] = useState<string[]>([]);
+  const [searchManifest, setSearchManifest] = useState<SearchManifest | null>(null);
+  const [visibleBooks, setVisibleBooks] = useState<OfficialBook[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [searchPage, setSearchPage] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const catalogPromise = useRef<Promise<void> | null>(null);
+  const detailShardPromises = useRef(new Map<number, Promise<CompactOfficialBook[]>>());
+  const detailCache = useRef(new Map<number, OfficialBook>());
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase("zh-TW"));
   const t = copy[language];
 
-  function loadOfficialCatalog() {
-    if (catalogLoaded || catalogLoading) return;
+  const loadOfficialCatalog = useCallback(() => {
+    if (catalogPromise.current) return catalogPromise.current;
     setCatalogLoading(true);
-    Promise.all([
-      fetch("/official-search-compact-1.json?v=stock-112054-images-20260812").then((response) => response.json()),
-      fetch("/official-search-compact-2.json?v=stock-112054-images-20260812").then((response) => response.json()),
-    ])
-      .then((parts: CompactOfficialBook[][]) => {
-        const data = parts.flat();
-        setOfficialBooks(data.map((book, index) => ({
-          id: String(index + 1),
-          title: book[0] || "",
-          author: book[1] || "",
-          publisher: book[2] || "",
-          publish_date: "",
-          url: book[3].startsWith("/") ? "https://2book.tw" + book[3] : book[3],
-        })));
+    catalogPromise.current = fetch("/official-search-manifest.json", { cache: "no-cache" })
+      .then((response) => {
+        if (!response.ok) throw new Error("manifest");
+        return response.json() as Promise<SearchManifest>;
+      })
+      .then(async (manifest) => {
+        const responses = await Promise.all(manifest.index_parts.map((url) => fetch(url, { cache: "force-cache" })));
+        if (responses.some((response) => !response.ok)) throw new Error("index");
+        const parts = await Promise.all(responses.map((response) => response.json() as Promise<string[]>));
+        setSearchManifest(manifest);
+        setSearchTerms(parts.flat());
         setCatalogLoaded(true);
       })
+      .catch(() => {
+        catalogPromise.current = null;
+      })
       .finally(() => setCatalogLoading(false));
-  }
+    return catalogPromise.current;
+  }, []);
 
-  const filtered = useMemo(() => {
-    if (!deferredQuery) return officialBooks;
-    return officialBooks.filter((book) => (book.title + " " + book.author + " " + book.publisher).toLocaleLowerCase("zh-TW").includes(deferredQuery));
-  }, [officialBooks, deferredQuery]);
-  const pageCount = Math.max(1, Math.ceil(filtered.length / SEARCH_PAGE_SIZE));
-  const visible = filtered.slice((searchPage - 1) * SEARCH_PAGE_SIZE, searchPage * SEARCH_PAGE_SIZE);
+  useEffect(() => {
+    const windowWithIdle = window as Window & typeof globalThis & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (windowWithIdle.requestIdleCallback) {
+      const idleId = windowWithIdle.requestIdleCallback(() => void loadOfficialCatalog(), { timeout: 800 });
+      return () => windowWithIdle.cancelIdleCallback?.(idleId);
+    }
+    const timeoutId = window.setTimeout(() => void loadOfficialCatalog(), 250);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadOfficialCatalog]);
+
+  const matchingIndices = useMemo<number[] | null>(() => {
+    if (!catalogLoaded || !deferredQuery) return null;
+    const starts: number[] = [];
+    const partial: number[] = [];
+    searchTerms.forEach((term, index) => {
+      if (term.startsWith(deferredQuery)) starts.push(index);
+      else if (term.includes(deferredQuery)) partial.push(index);
+    });
+    return starts.concat(partial);
+  }, [catalogLoaded, deferredQuery, searchTerms]);
+  const resultCount = matchingIndices ? matchingIndices.length : searchTerms.length;
+  const pageCount = Math.max(1, Math.ceil(resultCount / SEARCH_PAGE_SIZE));
+  const visibleIndices = useMemo(() => {
+    const start = (searchPage - 1) * SEARCH_PAGE_SIZE;
+    const end = Math.min(start + SEARCH_PAGE_SIZE, resultCount);
+    if (matchingIndices) return matchingIndices.slice(start, end);
+    return Array.from({ length: Math.max(0, end - start) }, (_, offset) => start + offset);
+  }, [matchingIndices, resultCount, searchPage]);
+
+  useEffect(() => {
+    if (!catalogLoaded || !searchManifest || visibleIndices.length === 0) {
+      setVisibleBooks([]);
+      return;
+    }
+    let cancelled = false;
+    setDetailsLoading(true);
+    const shardIds = [...new Set(visibleIndices.map((index) => Math.floor(index / searchManifest.shard_size)))];
+    const loads = shardIds.map((shardId) => {
+      let pending = detailShardPromises.current.get(shardId);
+      if (!pending) {
+        const shardName = String(shardId).padStart(3, "0") + ".json";
+        pending = fetch(`${searchManifest.details_prefix}${shardName}?v=${searchManifest.version}`, { cache: "force-cache" })
+          .then((response) => {
+            if (!response.ok) throw new Error("details");
+            return response.json() as Promise<CompactOfficialBook[]>;
+          })
+          .then((rows) => {
+            rows.forEach((book, offset) => {
+              const index = shardId * searchManifest.shard_size + offset;
+              detailCache.current.set(index, {
+                id: String(index + 1),
+                title: book[0] || "",
+                author: book[1] || "",
+                publisher: book[2] || "",
+                publish_date: "",
+                url: book[3].startsWith("/") ? "https://2book.tw" + book[3] : book[3],
+              });
+            });
+            return rows;
+          });
+        detailShardPromises.current.set(shardId, pending);
+      }
+      return pending;
+    });
+    Promise.all(loads)
+      .then(() => {
+        if (!cancelled) setVisibleBooks(visibleIndices.map((index) => detailCache.current.get(index)).filter((book): book is OfficialBook => Boolean(book)));
+      })
+      .catch(() => {
+        if (!cancelled) setVisibleBooks([]);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [catalogLoaded, searchManifest, visibleIndices]);
 
   function submitInquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,9 +244,9 @@ export default function CatalogBrowser() {
       <section className="catalog-section" id="catalog">
         <div className="section-heading"><div><span className="section-kicker">{t.searchKicker}</span><h2>{t.searchTitle}</h2></div><p>{t.searchDesc}</p></div>
         <div className="search-panel single-search"><label className="search-box"><span aria-hidden="true">⌕</span><input value={query} onFocus={loadOfficialCatalog} onChange={(event) => { setQuery(event.target.value); setSearchPage(1); loadOfficialCatalog(); }} placeholder={t.placeholder} aria-label={t.placeholder} /></label></div>
-        <div className="results-bar"><p>{catalogLoading ? t.loading : catalogLoaded ? <><strong>{number(filtered.length, language)}</strong> {t.results}</> : t.loadHint}</p><span>{t.title} · {t.author} · {t.publisher}</span></div>
-        {catalogLoaded && <div className="catalog-table"><div className="table-head official-columns"><span>{t.title}</span><span>{t.author}</span><span>{t.publisher}</span></div>{visible.map((book, index) => <article className="book-row official-columns" key={book.id}><div className="book-title"><small>{String((searchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(6, "0")}</small><strong><a href={book.url} target="_blank" rel="noreferrer">{book.title} <span className="external-mark">↗</span></a></strong></div><div className="book-author">{book.author}</div><div className="book-publish-date">{book.publisher}</div></article>)}</div>}
-        {catalogLoaded && filtered.length > SEARCH_PAGE_SIZE && <div className="pagination"><button disabled={searchPage === 1} onClick={() => setSearchPage((value) => Math.max(1, value - 1))}>{t.previous}</button><span>{t.page} <strong>{number(searchPage, language)}</strong> / {number(pageCount, language)}</span><button disabled={searchPage === pageCount} onClick={() => setSearchPage((value) => Math.min(pageCount, value + 1))}>{t.next}</button></div>}
+        <div className="results-bar"><p>{catalogLoading ? t.loading : catalogLoaded ? <><strong>{number(resultCount, language)}</strong> {t.results}</> : t.loadHint}</p><span>{detailsLoading ? t.loading : `${t.title} · ${t.author} · ${t.publisher}`}</span></div>
+        {catalogLoaded && <div className="catalog-table"><div className="table-head official-columns"><span>{t.title}</span><span>{t.author}</span><span>{t.publisher}</span></div>{visibleBooks.map((book, index) => <article className="book-row official-columns" key={book.id}><div className="book-title"><small>{String((searchPage - 1) * SEARCH_PAGE_SIZE + index + 1).padStart(6, "0")}</small><strong><a href={book.url} target="_blank" rel="noreferrer">{book.title} <span className="external-mark">↗</span></a></strong></div><div className="book-author">{book.author}</div><div className="book-publish-date">{book.publisher}</div></article>)}</div>}
+        {catalogLoaded && resultCount > SEARCH_PAGE_SIZE && <div className="pagination"><button disabled={searchPage === 1} onClick={() => setSearchPage((value) => Math.max(1, value - 1))}>{t.previous}</button><span>{t.page} <strong>{number(searchPage, language)}</strong> / {number(pageCount, language)}</span><button disabled={searchPage === pageCount} onClick={() => setSearchPage((value) => Math.min(pageCount, value + 1))}>{t.next}</button></div>}
       </section>
 
       <section className="archive-section" id="archive">
